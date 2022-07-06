@@ -465,7 +465,7 @@ public class JSON2CSV {
 
     private static String getValue(Map<String,Object> properties, String column) {
 
-            if(column.startsWith("axiom+")) {
+        if(column.startsWith("axiom+")) {
 
                 String predicate = column.substring(6);
                 Object axiom = properties.get(predicate);
