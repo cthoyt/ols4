@@ -152,11 +152,6 @@ public class OwlTranslator implements StreamRDF {
 
     }
 
-
-    static final Set<String> classTypes = new TreeSet<>(Set.of("entity", "term", "class"));
-    static final Set<String> propertyTypes = new TreeSet<>(Set.of("entity", "term", "property"));
-    static final Set<String> individualTypes = new TreeSet<>(Set.of("entity", "individual"));
-
     public void write(JsonWriter writer) throws IOException {
 
         writer.beginObject();
@@ -180,7 +175,7 @@ public class OwlTranslator implements StreamRDF {
             writeGenericValue(writer, configVal);
         }
 
-        writeProperties(writer, ontologyNode.properties, Set.of("ontology"));
+        writeProperties(writer, ontologyNode, ontologyNode.properties, OwlNode.NodeType.ONTOLOGY);
 
         writer.name("classes");
         writer.beginArray();
@@ -192,7 +187,7 @@ public class OwlTranslator implements StreamRDF {
                 continue;
             }
             if (c.types.contains(OwlNode.NodeType.CLASS)) {
-                writeNode(writer, c, classTypes);
+                writeNode(writer, c, OwlNode.NodeType.CLASS);
             }
         }
 
@@ -209,7 +204,7 @@ public class OwlTranslator implements StreamRDF {
                 continue;
             }
             if (c.types.contains(OwlNode.NodeType.PROPERTY)) {
-                writeNode(writer, c, propertyTypes);
+                writeNode(writer, c, OwlNode.NodeType.PROPERTY);
             }
         }
 
@@ -226,7 +221,7 @@ public class OwlTranslator implements StreamRDF {
                 continue;
             }
             if (c.types.contains(OwlNode.NodeType.NAMED_INDIVIDUAL)) {
-                writeNode(writer, c, individualTypes);
+                writeNode(writer, c, OwlNode.NodeType.NAMED_INDIVIDUAL);
             }
         }
 
@@ -238,16 +233,19 @@ public class OwlTranslator implements StreamRDF {
     }
 
 
-    private void writeNode(JsonWriter writer, OwlNode c, Set<String> types) throws IOException {
+    // asType is specified because nodes can be punned and therefore have multiple types, in
+    // which case they will be specified multiple times in the output (e.g. as both a class and an individual)
+    //
+    private void writeNode(JsonWriter writer, OwlNode nodeToWrite, OwlNode.NodeType asType) throws IOException {
 
-        if(c.types.contains(OwlNode.NodeType.RDF_LIST)) {
+        if(nodeToWrite.types.contains(OwlNode.NodeType.RDF_LIST)) {
 
             writer.beginArray();
 
-            for(OwlNode cur = c;;) {
+            for(OwlNode cur = nodeToWrite;;) {
 
                 PropertyValue first = cur.properties.getPropertyValue("http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
-                writePropertyValue(writer, first, null);
+		writeValue(writer, first);
 
                 PropertyValue rest = cur.properties.getPropertyValue("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
 
@@ -265,25 +263,35 @@ public class OwlTranslator implements StreamRDF {
 
             writer.beginObject();
 
-            if (c.uri != null) {
+            if (nodeToWrite.uri != null) {
                 writer.name("uri");
-                writer.value(c.uri);
+                writer.value(nodeToWrite.uri);
             }
 
-            writeProperties(writer, c.properties, types);
+            writeProperties(writer, nodeToWrite, nodeToWrite.properties, asType);
             writer.endObject();
         }
     }
 
-    private void writeProperties(JsonWriter writer, PropertySet properties, Set<String> types) throws IOException {
+    // Based on the rdfs:domain of the property, should it be written for this SUBJECT?
+    // This cleans up the properties of punned objects so that only the correct ones are
+    // written for each type.
+    //
+    private boolean shouldWriteProperty(OwlNode subject, String predicate, PropertyValue value) {
+    }
 
-        if(types != null) {
+    // Based on the rdfs:range of the property, should it be written for this OBJECT?
+    // But also need to disambiguate which OBJECT we mean if there are multiple
+    private boolean shouldWriteProperty(OwlNode subject, String predicate, PropertyValue value) {
+    }
+
+
+
+    private void writeProperties(JsonWriter writer, OwlNode subject, PropertySet properties, OwlNode.NodeType asType) throws IOException {
+
+        if(asType != null) {
             writer.name("type");
-            writer.beginArray();
-            for(String type : types) {
-                writer.value(type);
-            }
-            writer.endArray();
+	    writeTypes(asType);
         }
 
         // TODO: sort keys, rdf:type should be first ideally
@@ -298,11 +306,11 @@ public class OwlTranslator implements StreamRDF {
             writer.name(predicate);
 
             if(values.size() == 1) {
-                writePropertyValue(writer, values.get(0), null);
+                writePropertyValue(writer, subject, predicate, values.get(0), null);
             } else {
                 writer.beginArray();
                 for (PropertyValue value : values) {
-                    writePropertyValue(writer, value, null);
+                    writePropertyValue(writer, subject, predicate, value, null);
                 }
                 writer.endArray();
             }
@@ -345,13 +353,13 @@ public class OwlTranslator implements StreamRDF {
     }
 
 
-    public void writePropertyValue(JsonWriter writer, PropertyValue value, Set<String> types) throws IOException {
+    public void writePropertyValue(JsonWriter writer, OwlNode subject, String predicate, PropertyValue value, OwlNode.NodeType asType) throws IOException {
         if (value.properties != null) {
             // reified
             writer.beginObject();
             writer.name("value");
             writeValue(writer, value);
-            writeProperties(writer, value.properties, types);
+            writeProperties(writer, null, value.properties, asType);
             writer.endObject();
         } else {
             // not reified
@@ -371,8 +379,6 @@ public class OwlTranslator implements StreamRDF {
                 } else {
                     writeNode(writer, c, null);
                 }
-                break;
-            case ID:
                 break;
             case LITERAL:
                 PropertyValueLiteral literal = (PropertyValueLiteral) value;
@@ -565,6 +571,32 @@ public class OwlTranslator implements StreamRDF {
                 break;
         }
     }
+
+	private void writeTypes(JsonWriter writer, OwlNode.NodeType type) throws IOException {
+		writer.beginArray();
+		switch (type) {
+			case ONTOLOGY:
+				writer.value("ontology");
+				break;
+			case CLASS:
+				writer.value("entity");
+				writer.value("term");
+				writer.value("class");
+				break;
+			case PROPERTY:
+				writer.value("entity");
+				writer.value("term");
+				writer.value("property");
+				break;
+			case NAMED_INDIVIDUAL:
+				writer.value("entity");
+				writer.value("individual");
+				break;
+			default:
+				throw new RuntimeException("unknown type for output");
+		}
+		writer.endArray();
+	}
 
     @Override
     public void quad(Quad quad) {

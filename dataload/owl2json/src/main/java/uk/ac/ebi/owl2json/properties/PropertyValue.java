@@ -7,8 +7,7 @@ public abstract class PropertyValue {
     public enum Type {
         LITERAL,
         URI,
-        BNODE,
-        ID
+        BNODE
     }
 
     // further properties (for reification)
