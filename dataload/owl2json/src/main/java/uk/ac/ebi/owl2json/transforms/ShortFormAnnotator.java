@@ -2,17 +2,19 @@ package uk.ac.ebi.owl2json.transforms;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.graph.NodeFactory;
 
+import uk.ac.ebi.owl2json.OwlGraph;
 import uk.ac.ebi.owl2json.OwlNode;
 import uk.ac.ebi.owl2json.OwlTranslator;
 import uk.ac.ebi.owl2json.properties.PropertyValueLiteral;
 
 public class ShortFormAnnotator {
 
-	public static void annotateShortForms(OwlTranslator translator) {
+	public static void annotateShortForms(OwlGraph graph, Map<String,Object> ontologyConfig) {
 
 		long startTime3 = System.nanoTime();
 
@@ -21,7 +23,7 @@ public class ShortFormAnnotator {
 
 
 
-		Object configBaseUris = translator.config.get("baseUris");
+		Object configBaseUris = ontologyConfig.get("baseUris");
 
 		if(configBaseUris instanceof Collection<?>) {
 			ontologyBaseUris.addAll((Collection<String>) configBaseUris);
@@ -29,15 +31,15 @@ public class ShortFormAnnotator {
 
 
 
-		String preferredPrefix = (String)translator.config.get("preferredPrefix");
+		String preferredPrefix = (String)ontologyConfig.get("preferredPrefix");
 
 		if(preferredPrefix != null) {
 			ontologyBaseUris.add("http://purl.obolibrary.org/obo/" + preferredPrefix + "_");
 		}
 
 
-		for(String id : translator.nodes.keySet()) {
-		    OwlNode c = translator.nodes.get(id);
+		for(String id : graph.nodes.keySet()) {
+		    OwlNode c = graph.nodes.get(id);
 		    if (c.types.contains(OwlNode.NodeType.CLASS) ||
 				c.types.contains(OwlNode.NodeType.PROPERTY) ||
 				c.types.contains(OwlNode.NodeType.NAMED_INDIVIDUAL)) {
@@ -49,7 +51,7 @@ public class ShortFormAnnotator {
 			c.properties.addProperty(
 				"shortForm",
 					PropertyValueLiteral.fromString(
-						getShortForm(translator, ontologyBaseUris, preferredPrefix, c)
+						getShortForm(graph, ontologyBaseUris, preferredPrefix, c)
 					));
 		    }
 		}
@@ -60,7 +62,7 @@ public class ShortFormAnnotator {
 	}
 	
 
-	private static String getShortForm(OwlTranslator translator, Set<String> ontologyBaseUris, String preferredPrefix, OwlNode node) {
+	private static String getShortForm(OwlGraph graph, Set<String> ontologyBaseUris, String preferredPrefix, OwlNode node) {
 
 		String uri = node.uri;
 

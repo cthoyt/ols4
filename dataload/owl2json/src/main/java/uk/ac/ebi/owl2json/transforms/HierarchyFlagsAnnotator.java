@@ -1,6 +1,8 @@
 package uk.ac.ebi.owl2json.transforms;
 
 import org.apache.jena.graph.NodeFactory;
+
+import uk.ac.ebi.owl2json.OwlGraph;
 import uk.ac.ebi.owl2json.OwlNode;
 import uk.ac.ebi.owl2json.OwlTranslator;
 import uk.ac.ebi.owl2json.properties.PropertyValueLiteral;
@@ -12,12 +14,12 @@ import java.util.Set;
 
 public class HierarchyFlagsAnnotator {
 
-    public static void annotateHierarchyFlags(OwlTranslator translator) {
+    public static void annotateHierarchyFlags(OwlGraph graph) {
 
         long startTime3 = System.nanoTime();
 
-        for(String id : translator.nodes.keySet()) {
-            OwlNode c = translator.nodes.get(id);
+        for(String id : graph.nodes.keySet()) {
+            OwlNode c = graph.nodes.get(id);
 
 		    if (c.types.contains(OwlNode.NodeType.CLASS) ||
 				c.types.contains(OwlNode.NodeType.PROPERTY) ||
@@ -28,13 +30,13 @@ public class HierarchyFlagsAnnotator {
                     continue;
 
                 c.properties.addProperty("hasChildren",
-                        translator.hasChildren.contains(c.uri) ?
+                        graph.hasChildren.contains(c.uri) ?
                             PropertyValueLiteral.fromString("true") :
                             PropertyValueLiteral.fromString("false")
                 );
 
                 c.properties.addProperty("isRoot",
-                        translator.hasParents.contains(c.uri) ?
+                        graph.hasParents.contains(c.uri) ?
                                 PropertyValueLiteral.fromString("false") :
                                 PropertyValueLiteral.fromString("true")
                 );

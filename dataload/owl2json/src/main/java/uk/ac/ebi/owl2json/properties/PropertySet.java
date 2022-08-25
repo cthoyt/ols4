@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import uk.ac.ebi.owl2json.OwlGraph;
 import uk.ac.ebi.owl2json.OwlTranslator;
 
 public class PropertySet {
@@ -36,7 +37,7 @@ public class PropertySet {
     }
 
     public void annotateProperty(String predicate, PropertyValue value, String predicate2, PropertyValue value2,
-            OwlTranslator translator) {
+            OwlGraph graph) {
 
         List<PropertyValue> props = properties.get(predicate);
 
@@ -48,7 +49,7 @@ public class PropertySet {
                 // bnode case, look for an isomorphic bnode
                 for (PropertyValue existingValue : props) {
                     if (existingValue.getType() == PropertyValue.Type.BNODE) {
-                        if (translator.areSubgraphsIsomorphic(existingValue, value)) {
+                        if (graph.areSubgraphsIsomorphic(existingValue, value)) {
                             prop = existingValue;
                             break;
                         }

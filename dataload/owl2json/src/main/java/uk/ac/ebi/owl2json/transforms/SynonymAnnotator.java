@@ -1,13 +1,14 @@
 package uk.ac.ebi.owl2json.transforms;
 import java.util.*;
 
+import uk.ac.ebi.owl2json.OwlGraph;
 import uk.ac.ebi.owl2json.OwlNode;
 import uk.ac.ebi.owl2json.OwlTranslator;
 import uk.ac.ebi.owl2json.properties.PropertyValue;
 
 public class SynonymAnnotator {
 
-	public static void annotateSynonyms(OwlTranslator translator) {
+	public static void annotateSynonyms(OwlGraph graph, Map<String,Object> ontologyConfig) {
 
 		long startTime3 = System.nanoTime();
 
@@ -16,15 +17,15 @@ public class SynonymAnnotator {
 		synonymProperties.add("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym");
 
 
-		Object configSynonymProperties = translator.config.get("synonym_property");
+		Object configSynonymProperties = ontologyConfig.get("synonym_property");
 
 		if(configSynonymProperties instanceof Collection<?>) {
 			synonymProperties.addAll((Collection<String>) configSynonymProperties);
 		}
 
 
-		for(String id : translator.nodes.keySet()) {
-		    OwlNode c = translator.nodes.get(id);
+		for(String id : graph.nodes.keySet()) {
+		    OwlNode c = graph.nodes.get(id);
 		    if (c.types.contains(OwlNode.NodeType.CLASS) ||
 				c.types.contains(OwlNode.NodeType.PROPERTY) ||
 				c.types.contains(OwlNode.NodeType.NAMED_INDIVIDUAL)) {
