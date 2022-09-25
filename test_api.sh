@@ -20,7 +20,7 @@ do
 
     export OLS4_CONFIG=$f
     export OLS4_APITEST_OUTDIR=$(pwd)/testcases_output_api/$TEST_FOLDER
-    export OLS4_DATALOAD_ARGS="--noDates --loadLocalFiles"
+    export OLS4_DATALOAD_ARGS="--loadLocalFiles"
     export BUILDKIT_PROGRESS=plain
 
     docker-compose down -t 120 -v --rmi all

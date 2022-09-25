@@ -48,11 +48,10 @@ services:
         - ols4-neo4j 
     run-api-tests:
       profiles: ["run-api-tests"]
-      image: ubuntu:20.04
+      build: ./apitester4
       volumes:
         - ${OLS4_APITEST_OUTDIR:-./apitest}:/mnt/out:rw
-        - ./apitest.dockersh:/apitest.sh:ro
-      command: /apitest.sh
+      command: --url http://ols4-server --outDir /mnt/out --compareDir /mnt/compare
       depends_on:
         - ols4-server
       links:
