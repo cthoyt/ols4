@@ -50,7 +50,8 @@ services:
       profiles: ["run-api-tests"]
       build: ./apitester4
       volumes:
-        - ${OLS4_APITEST_OUTDIR:-./apitest}:/mnt/out:rw
+        - ${OLS4_APITEST_OUTDIR:-./to_be_filled_by_script_outdir}:/mnt/out:rw
+        - ${OLS4_APITEST_COMPAREDIR:-./to_be_filled_by_script_comparedir}:/mnt/compare:rw
       command: --url http://ols4-server --outDir /mnt/out --compareDir /mnt/compare
       depends_on:
         - ols4-server

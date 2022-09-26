@@ -31,9 +31,9 @@ public class Ols4ApiTester {
 
 
 	Gson gson;
-	String url, outDir, compareDir;
+	String url, outDir;
 
-	public Ols4ApiTester(String url, String outDir, String compareDir) {
+	public Ols4ApiTester(String url, String outDir) {
 
 		gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -43,7 +43,6 @@ public class Ols4ApiTester {
 
 		this.url = url;
 		this.outDir = outDir;
-		this.compareDir = compareDir;
 	}
 
 	public boolean test() throws MalformedURLException, IOException {

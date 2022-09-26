@@ -20,6 +20,7 @@ do
 
     export OLS4_CONFIG=$f
     export OLS4_APITEST_OUTDIR=$(pwd)/testcases_output_api/$TEST_FOLDER
+    export OLS4_APITEST_COMPAREDIR=$(pwd)/testcases_expected_output_api/$TEST_FOLDER
     export OLS4_DATALOAD_ARGS="--loadLocalFiles"
     export BUILDKIT_PROGRESS=plain
 
@@ -35,7 +36,5 @@ do
     docker-compose down -t 120 -v
 
 done
-
-diff --recursive --exclude=.gitkeep testcases_output_api testcases_expected_output_api/
 
 

@@ -27,7 +27,7 @@ public class App
         options.addOption(optOutDir);
 
         Option optCompareDir = new Option(null, "compareDir", true, "Directory to compare output with");
-        optCompareDir.setRequired(true);
+        optCompareDir.setRequired(false);
         options.addOption(optCompareDir);
 
         CommandLineParser parser = new DefaultParser();
@@ -45,10 +45,20 @@ public class App
 
         String url = cmd.getOptionValue("url");
         String outDir = cmd.getOptionValue("outDir");
-	String compareDir = cmd.getOptionValue("compareDir");
+        String compareDir = cmd.getOptionValue("compareDir");
 
-	System.exit(
-		(new Ols4ApiTester(url, outDir, compareDir).test() ? 0 : 1)
-	);
+        boolean success = true;
+
+        if(!new Ols4ApiTester(url, outDir).test()) {
+            success = false;
+        }
+
+        if(compareDir != null) {
+            if(!new RecursiveJsonDiff(outDir, compareDir).diff()) {
+                success = false;
+            }
+        }
+
+        System.exit( success ? 0 : 1 );
     }
 }
