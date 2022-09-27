@@ -50,15 +50,27 @@ public class App
         boolean success = true;
 
         if(!new Ols4ApiTester(url, outDir).test()) {
+	    System.out.println("Ols4ApiTester.test() reported failure");
             success = false;
-        }
+        } else {
+	    System.out.println("Ols4ApiTester.test() reported success");
+	}
 
         if(compareDir != null) {
             if(!new RecursiveJsonDiff(outDir, compareDir).diff()) {
+		System.out.println("RecursiveJsonDiff.diff() reported failure");
                 success = false;
-            }
+            } else {
+		System.out.println("RecursiveJsonDiff.diff() reported success");
+	    }
         }
 
-        System.exit( success ? 0 : 1 );
+	if(success) {
+		System.out.println("apitester reported success; exit code 0");
+		System.exit(0);
+	} else {
+		System.out.println("apitester reported failure; exit code 1");
+		System.exit(1);
+	}
     }
 }

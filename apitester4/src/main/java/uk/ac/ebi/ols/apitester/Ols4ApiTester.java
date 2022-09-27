@@ -47,15 +47,35 @@ public class Ols4ApiTester {
 
 	public boolean test() throws MalformedURLException, IOException {
 
-		JsonElement ontologies = getAll(url + "/api/ontologies");
-		write(outDir + "/ontologies.json", ontologies);
+		System.out.println("Waiting for API to become available...");
+
+		JsonElement ontologies = null;
+
+		int MAX_RETRIES = 60;
+
+		for(int nRetries = 0; nRetries < MAX_RETRIES; ++ nRetries) {
+
+			ontologies = getAll(url + "/api/ontologies");
+			write(outDir + "/ontologies.json", ontologies);
+
+			if(!ontologies.isJsonArray()) {
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException e) {}
+
+				continue;
+			}
+		}
+
+		if(ontologies == null || !ontologies.isJsonArray()) {
+			System.out.println("No ontologies returned! :-(");
+			return false;
+		} else {
+			System.out.println("Got " + ontologies.getAsJsonArray().size() + " ontologies");
+		}
 
 		JsonElement v2Ontologies = getAll(url + "/api/v2/ontologies");
 		write(outDir + "/v2/ontologies.json", v2Ontologies);
-
-		if(!ontologies.isJsonArray()) {
-			return false;
-		}
 
 		List<String> ontologyIds = new ArrayList();
 		for(JsonElement ontology : ontologies.getAsJsonArray()) {

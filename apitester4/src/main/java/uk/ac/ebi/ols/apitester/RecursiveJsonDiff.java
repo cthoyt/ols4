@@ -49,8 +49,19 @@ public class RecursiveJsonDiff {
 
         for(String filename : inputFiles) {
 
+            if(!expectedFiles.contains(filename)) {
+                // nothing to compare
+                continue;
+            }
+
             JsonElement jsonA = readJsonFile(inputDir + filename);
             JsonElement jsonB = readJsonFile(expectedDir + filename);
+
+            if(jsonA.isJsonObject() && jsonA.getAsJsonObject().has("error") &&
+                    jsonB.isJsonObject() && jsonB.getAsJsonObject().has("error")) {
+                System.out.println(filename + ": both input and expected were an error. This tool does not diff the contents of the error.");
+                continue;
+            }
 
             if(jsonA.equals(jsonB)) {
                 System.out.println(inputDir + filename + " was equal to " + expectedDir + filename);
