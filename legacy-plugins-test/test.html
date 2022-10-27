@@ -1,0 +1,60 @@
+
+
+<html>
+<head>
+
+<link rel="stylesheet" href="bootstrap.css"/>
+<link rel="stylesheet" href="ols-colors.css"/>
+<link rel="stylesheet" href="ols.css"/>
+<link rel="stylesheet" href="typeaheadjs.css"/>
+<link rel="stylesheet" href="proton/style.min.css"/>
+
+
+</head>
+<body>
+
+
+<input style="font-weight: normal" size="35" type="text" name="q" data-olswidget="select" data-olsontology="" data-selectpath="https://www.ebi.ac.uk/ols/" olstype="" id="local-searchbox" placeholder="Enter the term you are looking for" class="ac_input"></input>
+
+
+<div id="term-tree" style="height:300px; width:400px; border:1px solid black;"></div>
+
+
+
+
+<script src="jquery.min.js"></script>
+<script src="jstree.min.js"></script>
+<script src="typeahead.bundle.min.js"></script>
+<script src="handlebars.min.js"></script>
+<script src="ols-autocomplete.js"></script>
+<script src="ols-graphview.js"></script>
+<script src="ols-treeview.js"></script>
+
+<script>
+
+
+$(document).ready(function() {
+  var app = require("ols-autocomplete");
+  var instance = new app();
+  instance.start()
+});
+
+$(document).ready(function() {
+
+  var app = require("ols-treeview");
+  var instance = new app();
+  instance.draw($("#term-tree"), false, "efo", "terms", "http://www.ebi.ac.uk/efo/EFO_0000400", "https://www.ebi.ac.uk/ols/", {});
+
+});
+
+
+</script>
+
+
+
+</body>
+
+
+
+</html>
+
