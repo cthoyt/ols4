@@ -49,7 +49,7 @@ public class V1IndividualRepository {
 //            value = "MATCH (n:Individual)-[:INSTANCEOF|SUBCLASSOF*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN distinct parent")
     public Page<V1Term> getAllTypes(String ontologyId, String iri, String lang, Pageable pageable) { 
 
-	return this.neo4jClient.getAncestors("OntologyIndividual", ontologyId + "+individual+" + iri,
+	return this.neo4jClient.getAncestors("OntologyIndividual", ontologyId + "+individual+" + iri, false,
 			Arrays.asList("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2000/01/rdf-schema#subClassOf"), pageable)
 				.map(node -> new V1Term(node, lang, oboDbUrls));
     }

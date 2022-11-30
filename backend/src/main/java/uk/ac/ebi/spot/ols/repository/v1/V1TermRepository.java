@@ -69,11 +69,11 @@ public class V1TermRepository {
 //    @Query(
 //            countQuery = "MATCH (n:Class)-[:SUBCLASSOF|RelatedTree*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN count(distinct parent)",
 //            value = "MATCH (n:Class)-[:SUBCLASSOF|RelatedTree*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN distinct parent")
-    public Page<V1Term> getHierarchicalAncestors(String ontologyId, String iri, String lang, Pageable pageable) {
+    public Page<V1Term> getHierarchicalAncestors(String ontologyId, String iri, boolean siblings, String lang, Pageable pageable) {
 
 	List<String> relationIRIs = List.of("hierarchicalParent");
 
-	return this.neo4jClient.getAncestors("OntologyClass", ontologyId + "+class+" + iri, relationIRIs, pageable)
+	return this.neo4jClient.getAncestors("OntologyClass", ontologyId + "+class+" + iri, siblings, relationIRIs, pageable)
             .map(record -> new V1Term(record, lang, oboDbUrls));
 
     }
@@ -119,11 +119,11 @@ public class V1TermRepository {
 
 //    @Query(countQuery = "MATCH (n:Class)-[:SUBCLASSOF*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN count(distinct parent)",
 //                value = "MATCH (n:Class)-[:SUBCLASSOF*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN distinct parent")
-    public Page<V1Term> getAncestors(String ontologyId, String iri, String lang, Pageable pageable) {
+    public Page<V1Term> getAncestors(String ontologyId, String iri, boolean siblings, String lang, Pageable pageable) {
 
         V1Ontology ontology = ontologyRepository.get(ontologyId, lang);
 
-	return this.neo4jClient.getAncestors("OntologyClass", ontologyId + "+class+" + iri, Arrays.asList("directParent"), pageable)
+	return this.neo4jClient.getAncestors("OntologyClass", ontologyId + "+class+" + iri, siblings, Arrays.asList("directParent"), pageable)
             .map(record -> new V1Term(record, lang, oboDbUrls));
 
     }

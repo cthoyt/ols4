@@ -155,13 +155,14 @@ public class V1OntologyPropertyController {
     HttpEntity<PagedModel<V1Property>> ancestors(
             @PathVariable("onto") String ontologyId,
             @PathVariable("id") String termId,
+            @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
             Pageable pageable,
             PagedResourcesAssembler assembler) {
         ontologyId = ontologyId.toLowerCase();
 
         String decoded = UriUtils.decode(termId, "UTF-8");
-        Page<V1Property> ancestors = propertyRepository.getAncestors(ontologyId, decoded, lang, pageable);
+        Page<V1Property> ancestors = propertyRepository.getAncestors(ontologyId, decoded, siblings, lang, pageable);
         return new ResponseEntity<>( assembler.toModel(ancestors, termAssembler), HttpStatus.OK);
     }
 
@@ -202,7 +203,7 @@ public class V1OntologyPropertyController {
         try {
             String decoded = UriUtils.decode(termId, "UTF-8");
 
-            Object object= jsTreeRepository.getJsTreeForProperty(decoded, ontologyId, lang);
+            Object object= jsTreeRepository.getJsTreeForProperty(decoded, ontologyId, siblings, lang);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             return new HttpEntity<String>(ow.writeValueAsString(object));
         } catch (JsonProcessingException e) {

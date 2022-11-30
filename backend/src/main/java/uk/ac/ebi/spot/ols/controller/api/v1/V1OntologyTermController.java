@@ -219,13 +219,14 @@ public class V1OntologyTermController {
       {MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE}, method = RequestMethod.GET)
     HttpEntity<PagedModel<V1Term>> getHierarchicalAncestors(@PathVariable("onto") String ontologyId,
                                                                 @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
+                                                                @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
                                                                 @PathVariable("id") String termId, Pageable pageable, PagedResourcesAssembler assembler) {
       
         ontologyId = ontologyId.toLowerCase();
 
         String decoded = UriUtils.decode(termId, "UTF-8");
         Page<V1Term> parents = termRepository.getHierarchicalAncestors(ontologyId,
-            decoded, lang, pageable);
+            decoded, siblings, lang, pageable);
         if (parents == null)
           throw new ResourceNotFoundException("No ancestors could be found for " + ontologyId
               + " and " + termId);
@@ -306,11 +307,12 @@ public class V1OntologyTermController {
         method = RequestMethod.GET)
     HttpEntity<PagedModel<V1Term>> ancestors(@PathVariable("onto") String ontologyId, @PathVariable("id") String termId, Pageable pageable,
                                                  @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
-                                                 PagedResourcesAssembler assembler) {
+                                             @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
+                                             PagedResourcesAssembler assembler) {
         ontologyId = ontologyId.toLowerCase();
 
         String decoded = UriUtils.decode(termId, "UTF-8");
-        Page<V1Term> ancestors = termRepository.getAncestors(ontologyId, decoded, lang, pageable);
+        Page<V1Term> ancestors = termRepository.getAncestors(ontologyId, decoded, siblings, lang, pageable);
         if (ancestors == null) throw  new ResourceNotFoundException();
 
         return new ResponseEntity<>( assembler.toModel(ancestors, termAssembler), HttpStatus.OK);
@@ -330,7 +332,7 @@ public class V1OntologyTermController {
 
         try {
             String decodedTermId = UriUtils.decode(termId, "UTF-8");
-            Object object= jsTreeRepository.getJsTreeForClass(decodedTermId, ontologyId, lang);
+            Object object= jsTreeRepository.getJsTreeForClass(decodedTermId, ontologyId, siblings, lang);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             return new HttpEntity<String>(ow.writeValueAsString(object));
         } catch (JsonProcessingException e) {
@@ -521,6 +523,7 @@ public class V1OntologyTermController {
             @RequestParam(value = "obo_id", required = false) String oboId,
             @RequestParam(value = "id", required = false) String id,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
+            @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
             Pageable pageable,
             PagedResourcesAssembler assembler) {
 
@@ -533,7 +536,7 @@ public class V1OntologyTermController {
         ontologyId = ontologyId.toLowerCase();
         if (target == null) throw new ResourceNotFoundException("No resource with " + id + " in " + ontologyId);
 
-        Page<V1Term>  terms = termRepository.getAncestors(ontologyId, target.iri, lang, pageable);
+        Page<V1Term>  terms = termRepository.getAncestors(ontologyId, target.iri, siblings, lang, pageable);
         return new ResponseEntity<>( assembler.toModel(terms, termAssembler), HttpStatus.OK);
     }
 
@@ -545,6 +548,7 @@ public class V1OntologyTermController {
             @RequestParam(value = "obo_id", required = false) String oboId,
             @RequestParam(value = "id", required = false) String id,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
+            @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
             Pageable pageable,
             PagedResourcesAssembler assembler) {
 
@@ -557,7 +561,7 @@ public class V1OntologyTermController {
         ontologyId = ontologyId.toLowerCase();
         if (target == null) throw new ResourceNotFoundException("No resource with " + id + " in " + ontologyId);
 
-        Page<V1Term>  terms = termRepository.getHierarchicalAncestors(ontologyId, target.iri, lang, pageable);
+        Page<V1Term>  terms = termRepository.getHierarchicalAncestors(ontologyId, target.iri, siblings, lang, pageable);
         return new ResponseEntity<>( assembler.toModel(terms, termAssembler), HttpStatus.OK);
     }
 

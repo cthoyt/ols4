@@ -99,7 +99,7 @@ export const getAncestors = createAsyncThunk(
     const doubleEncodedUri = encodeURIComponent(encodeURIComponent(entityIri));
     const ancestorsPage = await getPaginated<any>(
       `api/v2/ontologies/${ontologyId}/${entityType}/${doubleEncodedUri}/ancestors?${new URLSearchParams(
-        { size: "100" }
+        { size: "100", siblings: 'true' }
       )}`
     );
     return ancestorsPage.elements.map((obj) => thingFromProperties(obj));

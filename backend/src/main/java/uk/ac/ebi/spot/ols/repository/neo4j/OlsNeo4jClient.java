@@ -93,21 +93,33 @@ public class OlsNeo4jClient {
 	return neo4jClient.queryPaginated(query, "b", countQuery, parameters("type", type, "id", id), pageable);
     }
 
-    public Page<Map<String, Object>> getAncestors(String type, String id, List<String> relationIRIs, Pageable pageable) {
+    public Page<Map<String, Object>> getAncestors(String type, String id, boolean siblings, List<String> relationIRIs, Pageable pageable) {
 
 		String edge = makeEdge(relationIRIs);
 
-		String query =
-				"MATCH (c:" + type + ") WHERE c.id = $id "
+		String query, countQuery;
+		
+		
+		if(siblings) {
+			query = "MATCH (c:" + type + ") WHERE c.id = $id "
 						+ "WITH c "
-						+ "OPTIONAL MATCH (c)-[:" + edge + " *]->(ancestor) "
+						+ "OPTIONAL MATCH (c)-[:" + edge + " *]->(ancestor)<-[:" + edge + "]-(c2) "
+						+ "WITH c, c2, ancestor AS a RETURN a";
+			countQuery = "MATCH (c:" + type + ") WHERE c.id = $id "
+						+ "WITH c "
+						+ "OPTIONAL MATCH (c)-[:" + edge + " *]->(ancestor)<-[:" + edge + "]-(c2) " +
+						 "WITH c, c2, ancestor AS a RETURN count(a)";
+			
+		} else {
+			query = "MATCH (c:" + type + ") WHERE c.id = $id "
+						+ " WITH c "
+						+ " OPTIONAL MATCH (c)-[:" + edge + " *]->(ancestor) "
 						+ "RETURN ancestor AS a";
-
-		String countQuery =
-				"MATCH (a:" + type + ") WHERE a.id = $id "
+			countQuery = "MATCH (a:" + type + ") WHERE a.id = $id "
 						+ "WITH a "
 						+ "OPTIONAL MATCH (a)-[:" + edge + " *]->(ancestor) "
 						+ "RETURN count(ancestor)";
+		}
 
 		return neo4jClient.queryPaginated(query, "a", countQuery, parameters("type", type, "id", id), pageable);
     }

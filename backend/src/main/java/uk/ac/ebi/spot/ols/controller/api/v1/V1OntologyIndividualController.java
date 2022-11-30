@@ -135,6 +135,7 @@ public class V1OntologyIndividualController {
     HttpEntity<String> getJsTree(
             @PathVariable("onto") String ontologyId,
             @PathVariable("id") String termId,
+            @RequestParam(value = "siblings", defaultValue = "false", required = false) boolean siblings,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang
     ) {
         ontologyId = ontologyId.toLowerCase();
@@ -142,7 +143,7 @@ public class V1OntologyIndividualController {
         try {
             String decoded = UriUtils.decode(termId, "UTF-8");
 
-            Object object = jsTreeRepository.getJsTreeForIndividual(decoded, ontologyId, lang);
+            Object object = jsTreeRepository.getJsTreeForIndividual(decoded, ontologyId, siblings, lang);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             return new HttpEntity<String>(ow.writeValueAsString(object));
         } catch (JsonProcessingException e) {

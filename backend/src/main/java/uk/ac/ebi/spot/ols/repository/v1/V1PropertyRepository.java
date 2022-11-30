@@ -60,9 +60,9 @@ public class V1PropertyRepository {
 
 //    @Query(countQuery = "MATCH (n:Property)-[:SUBPROPERTYOF*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN count(distinct parent)",
 //            value = "MATCH (n:Property)-[:SUBPROPERTYOF*]->(parent) WHERE n.ontology_name = {0} AND n.iri = {1} RETURN distinct parent")
-    public Page<V1Property> getAncestors(String ontologyId, String iri, String lang, Pageable pageable)  {
+    public Page<V1Property> getAncestors(String ontologyId, String iri, boolean siblings, String lang, Pageable pageable)  {
 
-	return neo4jClient.getAncestors("OntologyTerm", ontologyId + "+property+" + iri, Arrays.asList("http://www.w3.org/2000/01/rdf-schema#subPropertyOf"), pageable)
+	return neo4jClient.getAncestors("OntologyTerm", ontologyId + "+property+" + iri, siblings, Arrays.asList("http://www.w3.org/2000/01/rdf-schema#subPropertyOf"), pageable)
             .map(record -> new V1Property(record, lang));
     }
 

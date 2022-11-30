@@ -15,19 +15,19 @@ public class V1JsTreeRepository {
     @Autowired
     OlsNeo4jClient neo4jClient;
 
-    public List<Map<String,Object>> getJsTreeForClass(String iri, String ontologyId, String lang) {
-        return getJsTreeForEntity(iri, "class", "OntologyClass", ontologyId, lang);
+    public List<Map<String,Object>> getJsTreeForClass(String iri, String ontologyId, boolean siblings, String lang) {
+        return getJsTreeForEntity(iri, "class", "OntologyClass", siblings, ontologyId, lang);
     }
 
-    public List<Map<String,Object>> getJsTreeForProperty(String iri, String ontologyId, String lang) {
-        return getJsTreeForEntity(iri, "property", "OntologyProperty", ontologyId, lang);
+    public List<Map<String,Object>> getJsTreeForProperty(String iri, String ontologyId, boolean siblings, String lang) {
+        return getJsTreeForEntity(iri, "property", "OntologyProperty", siblings, ontologyId, lang);
     }
 
-    public List<Map<String,Object>> getJsTreeForIndividual(String iri, String ontologyId, String lang) {
-        return getJsTreeForEntity(iri, "individual", "OntologyIndividual", ontologyId, lang);
+    public List<Map<String,Object>> getJsTreeForIndividual(String iri, String ontologyId, boolean siblings, String lang) {
+        return getJsTreeForEntity(iri, "individual", "OntologyIndividual", siblings, ontologyId, lang);
     }
 
-    private List<Map<String,Object>> getJsTreeForEntity(String iri, String type, String neo4jType, String ontologyId, String lang) {
+    private List<Map<String,Object>> getJsTreeForEntity(String iri, String type, String neo4jType, boolean siblings, String ontologyId, String lang) {
 
         List<String> parentRelationIRIs = List.of("directParent");
 
@@ -37,7 +37,7 @@ public class V1JsTreeRepository {
         thisEntity = GenericLocalizer.localize(thisEntity, lang);
 
         List<Map<String,Object>> ancestors =
-                neo4jClient.getAncestors(neo4jType, thisEntityId, parentRelationIRIs, null)
+                neo4jClient.getAncestors(neo4jType, thisEntityId, siblings, parentRelationIRIs, null)
                         .getContent();
         ancestors = ancestors.stream().map(ancestor -> GenericLocalizer.localize(ancestor, lang)).collect(Collectors.toList());
 

@@ -129,13 +129,14 @@ public class V2ClassController implements
             @PageableDefault(size = 20, page = 0) Pageable pageable,
             @PathVariable("onto") String ontologyId,
             @PathVariable("class") String iri,
+            @RequestParam(value = "siblings", required = false, defaultValue = "false") boolean siblings,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
             PagedResourcesAssembler assembler
     ) throws ResourceNotFoundException {
 
         iri = UriUtils.decode(iri, "UTF-8");
 
-        Page<V2Class> document = classRepository.getAncestorsByOntologyId(ontologyId, pageable, iri, lang);
+        Page<V2Class> document = classRepository.getAncestorsByOntologyId(ontologyId, siblings, pageable, iri, lang);
         return new ResponseEntity<>( assembler.toModel(document, documentAssembler), HttpStatus.OK);
     }
 
@@ -148,12 +149,13 @@ public class V2ClassController implements
             @PathVariable("onto") String ontologyId,
             @PathVariable("individual") String iri,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
+            @RequestParam(value = "siblings", required = false, defaultValue = "false") boolean siblings,
             PagedResourcesAssembler assembler
     ) throws ResourceNotFoundException {
 
         iri = UriUtils.decode(iri, "UTF-8");
 
-        Page<V2Class> document = classRepository.getIndividualAncestorsByOntologyId(ontologyId, pageable, iri, lang);
+        Page<V2Class> document = classRepository.getIndividualAncestorsByOntologyId(ontologyId, siblings, pageable, iri, lang);
         return new ResponseEntity<>( assembler.toModel(document, documentAssembler), HttpStatus.OK);
     }
 }
