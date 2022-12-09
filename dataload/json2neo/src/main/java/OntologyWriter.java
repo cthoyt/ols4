@@ -45,7 +45,6 @@ public class OntologyWriter {
         edgesPrinter = CSVFormat.POSTGRESQL_CSV.withHeader(edgesCsvHeader.toArray(new String[0])).print(
                 new File(outputFilePath + "/" + ontologyId + "_edges.csv"), Charset.defaultCharset());
 
-
         reader.beginObject(); // ontology
 
         writeOntology();
@@ -136,7 +135,7 @@ public class OntologyWriter {
 
             row[n++] = ontologyId + "+" + type + "+" + (String) entity.get("iri");
             row[n++] = nodeLabels;
-	    row[n++] = gson.toJson(entity);
+            row[n++] = gson.toJson(entity);
 
             for (String column : properties) {
                 row[n++] = serializeValue(entity, column);
@@ -296,7 +295,7 @@ public class OntologyWriter {
 
 
     private String replaceNeo4jSpecialCharsValue(String val) {
-        return val.replace("|", "+");
+        return val.replace("|", "\\u007C").replace("\n", "\\n");
     }
 
     private List<String> propertyHeaders(List<String> fieldNames) {
